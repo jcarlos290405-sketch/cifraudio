@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; style-src 'self'; img-src 'self' blob: data:; media-src blob:; connect-src 'self' data: wss://cifraudio-relay.onrender.com; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>CifrAudio</title>
+<meta name="theme-color" content="#0E1116">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CifrAudio">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+  <header id="topbar">
+    <button id="btn-back" class="icon-btn hidden" aria-label="Volver">&#8249;</button>
+    <h1 id="title">CifrAudio</h1>
+    <button id="btn-close-chat" class="icon-btn hidden" aria-label="Cerrar chat">&#10005;</button>
+  </header>
+
+  <main>
+    <!-- INICIO -->
+    <section id="screen-home" class="screen">
+      <div class="hero">
+        <div class="big-icon">&#128274;</div>
+        <h2>Cifrado de mensajes y audios</h2>
+        <p class="muted">Nada se guarda. Cada mensaje requiere su propia contrase&ntilde;a.</p>
+      </div>
+      <button class="card menu" id="go-encrypt">
+        <span class="card-icon">&#128273;</span>
+        <span class="card-text"><b>Cifrar</b><small>Crear un mensaje o audio cifrado para enviar</small></span>
+        <span class="chev">&#8250;</span>
+      </button>
+      <button class="card menu" id="go-decrypt">
+        <span class="card-icon">&#128275;</span>
+        <span class="card-text"><b>Descifrar</b><small>Abrir un archivo cifrado recibido</small></span>
+        <span class="chev">&#8250;</span>
+      </button>
+      <button class="card menu" id="go-live">
+        <span class="card-icon">&#128172;</span>
+        <span class="card-text"><b>Mensajer&iacute;a en vivo</b><small>Chat temporal con c&oacute;digo, por internet</small></span>
+        <span class="chev">&#8250;</span>
+      </button>
+    </section>
+
+    <!-- CIFRAR -->
+    <section id="screen-encrypt" class="screen hidden">
+      <div class="segmented">
+        <button id="mode-text" class="seg active">Texto</button>
+        <button id="mode-audio" class="seg">Audio</button>
+      </div>
+
+      <div id="enc-text-block">
+        <textarea id="enc-text" rows="6" placeholder="Escribe tu mensaje" autocomplete="off" spellcheck="false"></textarea>
+      </div>
+
+      <div id="enc-audio-block" class="card center hidden">
+        <div class="big-icon" id="rec-icon">&#127908;</div>
+        <p id="rec-status" class="muted">Sin grabar</p>
+        <div class="row">
+          <button id="btn-record" class="btn primary">Grabar</button>
+          <button id="btn-discard" class="btn outline hidden">Descartar</button>
+        </div>
+      </div>
+
+      <p class="hint">Crea una contrase&ntilde;a de 8 caracteres (letras y n&uacute;meros) para este mensaje</p>
+      <div id="enc-pw1"></div>
+      <div id="enc-pw2"></div>
+      <p id="enc-error" class="error hidden"></p>
+      <p id="enc-status" class="muted hidden"></p>
+      <button id="btn-encrypt" class="btn primary full">Cifrar</button>
+
+      <div id="enc-result" class="card center hidden">
+        <p class="success">&#10003; Archivo cifrado listo</p>
+        <p id="enc-filename" class="filename"></p>
+        <button id="btn-share" class="btn primary full">Compartir</button>
+        <button id="btn-save" class="btn outline full">Guardar en el tel&eacute;fono</button>
+        <button id="btn-enc-again" class="btn outline full">Cifrar otro mensaje</button>
+      </div>
+    </section>
+
+    <!-- DESCIFRAR -->
+    <section id="screen-decrypt" class="screen hidden">
+      <label class="card menu" for="dec-file">
+        <span class="card-icon">&#128206;</span>
+        <span class="card-text"><b id="dec-filename">Seleccionar archivo cifrado</b><small>Archivo .dat recibido</small></span>
+      </label>
+      <input id="dec-file" type="file" class="hidden">
+      <div id="dec-pw"></div>
+      <p id="dec-error" class="error hidden"></p>
+      <p id="dec-status" class="muted hidden"></p>
+      <button id="btn-decrypt" class="btn primary full">Descifrar</button>
+
+      <div id="dec-text-card" class="card hidden"><p id="dec-text"></p></div>
+      <div id="dec-audio-card" class="card hidden">
+        <p class="muted">Audio descifrado</p>
+        <audio id="dec-audio" controls playsinline></audio>
+      </div>
+    </section>
+
+    <!-- MENSAJERIA: ENTRADA -->
+    <section id="screen-live" class="screen hidden">
+      <button class="card menu" id="live-host">
+        <span class="card-icon">&#10133;</span>
+        <span class="card-text"><b>Iniciar chat</b><small>Crear un chat y obtener un c&oacute;digo para compartir</small></span>
+        <span class="chev">&#8250;</span>
+      </button>
+      <button class="card menu" id="live-join">
+        <span class="card-icon">&#128273;</span>
+        <span class="card-text"><b>Unirse con c&oacute;digo</b><small>Entrar al chat de otra persona</small></span>
+        <span class="chev">&#8250;</span>
+      </button>
+      <p class="hint center-text">En iPhone el chat funciona por internet. Para hablar con alguien que use la app de Android o Windows, esa persona debe elegir &laquo;Por internet&raquo;.</p>
+    </section>
+
+    <!-- CHAT -->
+    <section id="screen-chat" class="screen hidden">
+      <div id="chat-bg"></div>
+      <div id="chat-locked" class="hidden"><div class="big-icon">&#128274;</div></div>
+      <div id="chat-body">
+        <div id="chat-status" class="status"></div>
+        <div id="chat-list"></div>
+        <div id="chat-input">
+          <textarea id="chat-text" rows="1" placeholder="Escribe un mensaje" autocomplete="off" spellcheck="false"></textarea>
+          <button id="chat-send" class="icon-btn send" aria-label="Enviar">&#10148;</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="modal-root"></div>
+<div id="cover" class="hidden"><div class="big-icon">&#128274;</div></div>
+
+<noscript><p class="error">Esta aplicaci&oacute;n necesita JavaScript.</p></noscript>
+
+<script src="crypto.js"></script>
+<script src="relay.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
